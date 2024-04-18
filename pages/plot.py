@@ -1,6 +1,7 @@
 """
 The Plot-page consists of the file selection bar, and the tabs containing all the plots
 """
+
 from common.dash import html, dbc
 
 from pages.components import fileselection, legend, tabs
@@ -15,11 +16,11 @@ layout = html.Div(
                     [
                         html.A(
                             html.Img(
-                                src="assets/logo.svg",
+                                src="assets/MIMOSA.svg",
                                 width=350,
                                 style={"marginTop": "5px"},
                             ),
-                            href="https://github.com/kvanderwijst/MIMOSA",
+                            href="https://utrechtuniversity.github.io/mimosa",
                             target="_blank",
                         )
                     ],

@@ -44,7 +44,7 @@ layout_upload = html.Div(
                         children=html.Div(
                             [
                                 "Drag and Drop or ",
-                                html.A("Select Files", href="javascript:void(0);"),
+                                html.A("Select Files", href="#"),
                             ]
                         ),
                         style=upload_style,
@@ -114,7 +114,7 @@ def handle_upload_update(list_of_content, list_of_names):
     if list_of_content is not None:
         i = 0
         for content, name in zip(list_of_content, list_of_names):
-            line_dash = data.LINE_STYLES[i]
+            line_dash = (data.LINE_STYLES * 5)[i]
             parsed_dict, is_data = parse_contents(content, name, line_dash)
             if parsed_dict is not None:
                 if is_data:
