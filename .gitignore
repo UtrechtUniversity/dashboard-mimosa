@@ -17,5 +17,6 @@ ipython_config.py
 venv
 .DS_Store
 .env
+.venv
 
 .vscode/
