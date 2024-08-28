@@ -30,7 +30,7 @@ def create_plot(
 
     traces = []
 
-    for df_i, df_info in enumerate(df_dict.values()):
+    for df_i, (name, df_info) in enumerate(df_dict.items()):
         database = df_info["data"]
         if isinstance(database, dict):
             # t0 = time.time()
@@ -38,6 +38,7 @@ def create_plot(
             # t1 = time.time()
             # print("Took {} seconds".format(t1 - t0))
         line_dash = df_info["meta"]["line_dash"]
+        short_name = name.split(":")[0] if ":" in name else name
 
         selection = database[database["Variable"].isin(variables)]
         regions = list(selection["Region"].unique())
@@ -56,6 +57,7 @@ def create_plot(
         else:
             population_factor = 1
 
+        var_i = 0
         for var_i, (variable, subselection) in enumerate(selection.groupby("Variable")):
             # Color list * 3 to get the same colours repeated three times,
             # such that it never runs out of range
@@ -85,9 +87,13 @@ def create_plot(
                         "name": variable,
                         "legendgroup": variable,
                         "showlegend": region_i == 0 and df_i == 0,
-                        "visible": "legendonly"
-                        if hidden_variables is not None and variable in hidden_variables
-                        else None,
+                        "hovertemplate": f"{short_name}, {variable}: %{{y}}<extra></extra>",
+                        "visible": (
+                            "legendonly"
+                            if hidden_variables is not None
+                            and variable in hidden_variables
+                            else None
+                        ),
                         "stackgroup": stackgroup.get(variable),
                     }
                 )
@@ -102,7 +108,15 @@ def create_plot(
             "title": yaxis_title + (" (per capita) [UNIT?]" if percapita else "")
         },
         "margin": {"l": 50, "r": 20, "t": 30, "b": 30},
-        "legend": {"orientation": "h", "x": 0.5, "xanchor": "center", "y": -0.15},
+        "legend": {
+            "orientation": "h",
+            "x": 0.5,
+            "xanchor": "center",
+            "y": 0.0,
+            "yref": "container",
+            "title": {"text": f"Variable{'s' if var_i > 0 else ''}:"},
+        },
+        "hovermode": "x",
         "height": height,
         "annotations": [
             {
