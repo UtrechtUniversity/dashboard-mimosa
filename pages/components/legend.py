@@ -9,7 +9,7 @@ from common.dash import dbc, dcc, Input, Output, html
 
 layout = dbc.Row(
     [
-        dbc.Col(html.P("Differences:"), md=1),
+        dbc.Col(html.P("Scenarios:"), md=1),
         dbc.Col(html.Div(id="legend-table")),
         dbc.Col([], md=2),
     ]
@@ -17,13 +17,15 @@ layout = dbc.Row(
 
 
 @app.callback(
-    Output("legend-table", "children"), [Input("plot-data-store", "data")],
+    Output("legend-table", "children"),
+    [Input("plot-data-store", "data")],
 )
 def update_legend(databases):
     if (
-        databases is None or len(databases) <= 1
+        databases is None or len(databases) == 0
     ):  # Only update when multiple files are selected
         return []
+    print(databases.keys())
 
     differences = param_differences(databases)
 
@@ -51,20 +53,36 @@ def create_empty_legend(name, dash):
                 "x": [None],
                 "y": [None],
                 "mode": "lines",
-                "name": name,
-                "line": {"color": "black", "dash": dash,},
+                "name": f"<b>{name}</b>",
+                "line": {
+                    "color": "black",
+                    "dash": dash,
+                },
                 "showlegend": True,
             }
         ],
         "layout": {
             "height": 30,
-            "width": 200,
+            "width": 300,
             "margin": {"t": 0, "l": 0, "r": 0, "b": 0},
-            "legend": {"orientation": "h", "y": 0.5, "yanchor": "middle",},
+            "legend": {
+                "orientation": "h",
+                "y": 0.5,
+                "yanchor": "middle",
+                "font": {"size": 13},
+            },
             "paper_bgcolor": "rgba(0,0,0,0)",
             "plot_bgcolor": "rgba(0,0,0,0)",
-            "xaxis": {"showgrid": False, "zeroline": False, "visible": False,},
-            "yaxis": {"showgrid": False, "zeroline": False, "visible": False,},
+            "xaxis": {
+                "showgrid": False,
+                "zeroline": False,
+                "visible": False,
+            },
+            "yaxis": {
+                "showgrid": False,
+                "zeroline": False,
+                "visible": False,
+            },
         },
     }
 

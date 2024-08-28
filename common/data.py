@@ -55,14 +55,18 @@ class DataStore:
             return None
         # For each filename in the list, get the corresponding database
         databases = {}
-        for filename, line_dash in zip(filenames, LINE_STYLES):
+        for i, (filename, line_dash) in enumerate(zip(filenames, LINE_STYLES)):
             database = (
                 self.get_single_params(filename)
                 if params
                 else self.get_single_data(filename, as_dict)
             )
             if database is not None:
-                databases[filename] = {
+                letter = chr(ord("A") + i)
+                name = f"{letter}: " + filename.rstrip(".csv").rstrip(".xls").rstrip(
+                    ".xlsx"
+                )
+                databases[name] = {
                     "data": database,
                     "meta": {"line_dash": line_dash},
                 }

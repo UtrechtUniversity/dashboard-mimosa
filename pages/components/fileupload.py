@@ -19,7 +19,8 @@ from common.dash import dbc, dcc, Input, Output, State, html, PreventUpdate
 def all_experiments_options():
     options = []
     for filename in data.get_all_experiments():
-        options.append({"label": filename, "value": filename})
+        name = filename.rstrip(".csv").rstrip(".xls").rstrip(".xlsx")
+        options.append({"label": name, "value": filename})
     return options
 
 
@@ -96,7 +97,7 @@ layout = html.Div(
                     layout_select,
                     label="Select existing scenarios",
                     tab_id="files-select",
-                    **style
+                    **style,
                 ),
             ],
             id="file-select-type",
@@ -113,9 +114,13 @@ def handle_upload_update(list_of_content, list_of_names):
     params = {}
     if list_of_content is not None:
         i = 0
-        for content, name in zip(list_of_content, list_of_names):
+        for content, filename in zip(list_of_content, list_of_names):
             line_dash = (data.LINE_STYLES * 5)[i]
-            parsed_dict, is_data = parse_contents(content, name, line_dash)
+            parsed_dict, is_data = parse_contents(content, filename, line_dash)
+            letter = chr(ord("A") + i)
+            name = f"{letter}: " + filename.rstrip(".csv").rstrip(".xls").rstrip(
+                ".xlsx"
+            )
             if parsed_dict is not None:
                 if is_data:
                     databases[name] = parsed_dict
