@@ -6,7 +6,7 @@ Tab for the Damages plots:
  - Sea level rise
 """
 
-from common.dash import dcc, dbc, html, Input, Output, PreventUpdate
+from common.dash import dcc, dbc, html, Input, Output, PreventUpdate, short_name
 from common import data, params
 
 from pages.components.tabs_components import plotutils
@@ -43,29 +43,34 @@ def update_damages_plot(databases, timerange):
 
     height = max(250, params.DEFAULT_PLOT_HEIGHT / len(databases))
     figs = [
-        dcc.Graph(
-            figure=plotutils.create_plot(
-                {filename: single_df},
-                [
-                    "adapt_costs",
-                    "resid_damages",
-                    "damage_costs_slr",
-                    "damage_costs_non_slr",
-                    "gross_damages",
-                    "SLR_damages",
-                ],
-                timerange,
-                stackgroup={
-                    "adapt_costs": "costs",
-                    "resid_damages": "costs",
-                    "damage_costs_slr": "costs",
-                    "damage_costs_non_slr": "costs",
-                },
-                yaxis_title="Costs (% GDP)",
-                tickformat="p",
-                height=height,
-            ),
-            style={"height": f"{height}px"},
+        html.Div(
+            [
+                html.Strong(short_name(filename) + ":"),
+                dcc.Graph(
+                    figure=plotutils.create_plot(
+                        {filename: single_df},
+                        [
+                            "adapt_costs",
+                            "resid_damages",
+                            "damage_costs_slr",
+                            "damage_costs_non_slr",
+                            "gross_damages",
+                            "SLR_damages",
+                        ],
+                        timerange,
+                        stackgroup={
+                            "adapt_costs": "costs",
+                            "resid_damages": "costs",
+                            "damage_costs_slr": "costs",
+                            "damage_costs_non_slr": "costs",
+                        },
+                        yaxis_title="Costs (% GDP)",
+                        tickformat="p",
+                        height=height,
+                    ),
+                    style={"height": f"{height}px"},
+                ),
+            ]
         )
         for filename, single_df in databases.items()
     ]
@@ -126,32 +131,37 @@ def update_slr_plot(databases, timerange):
     figs = dbc.Row(
         [
             dbc.Col(
-                dcc.Graph(
-                    figure=plotutils.create_plot(
-                        {filename: single_df},
-                        [
-                            "SLR",  # Old names
-                            "CUMGSIC",
-                            "CUMGIS",
-                            "slr_thermal",  # New names
-                            "slr_cumgsic",
-                            "slr_cumgis",
-                            "total_SLR",
-                        ],
-                        timerange,
-                        stackgroup={
-                            "SLR": "SLR",
-                            "CUMGSIC": "SLR",
-                            "CUMGIS": "SLR",
-                            "slr_thermal": "SLR",
-                            "slr_cumgsic": "SLR",
-                            "slr_cumgis": "SLR",
-                        },
-                        yaxis_title="SLR (in meter)",
-                        colors=[8, 9, 10, 11],
-                        height=height,
-                    ),
-                    style={"height": f"{height}px"},
+                html.Div(
+                    [
+                        html.Strong(short_name(filename) + ":"),
+                        dcc.Graph(
+                            figure=plotutils.create_plot(
+                                {filename: single_df},
+                                [
+                                    "SLR",  # Old names
+                                    "CUMGSIC",
+                                    "CUMGIS",
+                                    "slr_thermal",  # New names
+                                    "slr_cumgsic",
+                                    "slr_cumgis",
+                                    "total_SLR",
+                                ],
+                                timerange,
+                                stackgroup={
+                                    "SLR": "SLR",
+                                    "CUMGSIC": "SLR",
+                                    "CUMGIS": "SLR",
+                                    "slr_thermal": "SLR",
+                                    "slr_cumgsic": "SLR",
+                                    "slr_cumgis": "SLR",
+                                },
+                                yaxis_title="SLR (in meter)",
+                                colors=[8, 9, 10, 11],
+                                height=height,
+                            ),
+                            style={"height": f"{height}px"},
+                        ),
+                    ]
                 )
             )
             for filename, single_df in databases.items()

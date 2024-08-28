@@ -111,25 +111,27 @@ layout = html.Div(
 
 def handle_upload_update(list_of_content, list_of_names):
     databases = {}
+    name_map = {}  # Contains the mapping from filename to display name (with letter)
     params = {}
     if list_of_content is not None:
         i = 0
         for content, filename in zip(list_of_content, list_of_names):
             line_dash = (data.LINE_STYLES * 5)[i]
             parsed_dict, is_data = parse_contents(content, filename, line_dash)
-            letter = chr(ord("A") + i)
-            name = f"{letter}: " + filename.rstrip(".csv").rstrip(".xls").rstrip(
-                ".xlsx"
-            )
             if parsed_dict is not None:
                 if is_data:
+                    letter = chr(ord("A") + i)
+                    name = f"Scenario {letter}: " + filename.rstrip(".csv").rstrip(
+                        ".xls"
+                    ).rstrip(".xlsx")
+                    name_map[filename] = name
                     databases[name] = parsed_dict
                     i += 1
                 else:
-                    params[name] = parsed_dict
+                    params[filename] = parsed_dict
 
     for name_raw, single_params in params.items():
-        name = name_raw.rstrip(".params.json")
+        name = name_map[name_raw.rstrip(".params.json")]
         if name in databases:
             databases[name]["meta"]["params"] = single_params
     if len(databases) > 0:

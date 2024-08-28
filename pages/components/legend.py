@@ -25,12 +25,16 @@ def update_legend(databases):
         databases is None or len(databases) == 0
     ):  # Only update when multiple files are selected
         return []
-    print(databases.keys())
 
     differences = param_differences(databases)
 
     headers = [
-        html.Th(create_empty_legend(name, databases[name]["meta"]["line_dash"]))
+        html.Th(
+            html.Div(
+                [create_empty_legend(name, databases[name]["meta"]["line_dash"]), name],
+                style={"display": "flex", "align-items": "center"},
+            )
+        )
         for name in differences.columns
     ]
     table_header = [html.Thead(html.Tr([html.Td()] + headers))]
@@ -53,7 +57,8 @@ def create_empty_legend(name, dash):
                 "x": [None],
                 "y": [None],
                 "mode": "lines",
-                "name": f"<b>{name}</b>",
+                # "name": f"<b>{name}</b>",
+                "name": "",
                 "line": {
                     "color": "black",
                     "dash": dash,
@@ -63,7 +68,7 @@ def create_empty_legend(name, dash):
         ],
         "layout": {
             "height": 30,
-            "width": 300,
+            "width": 50,
             "margin": {"t": 0, "l": 0, "r": 0, "b": 0},
             "legend": {
                 "orientation": "h",

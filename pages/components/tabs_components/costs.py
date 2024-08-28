@@ -4,7 +4,8 @@ Tab for the Cost plots:
   - carbon prices
   - learning factors
 """
-from common.dash import dcc, html, Input, Output, PreventUpdate
+
+from common.dash import dcc, html, Input, Output, PreventUpdate, short_name
 from common import data, params
 
 from pages.components.tabs_components import plotutils
@@ -42,28 +43,33 @@ def update_costs_plot(databases, timerange):
 
     height = max(250, params.DEFAULT_PLOT_HEIGHT / len(databases))
     figs = [
-        dcc.Graph(
-            figure=plotutils.create_plot(
-                {filename: single_df},
-                [
-                    "rel_abatement_costs",
-                    "rel_mitigation_costs",
-                    "damage_costs",
-                    "rel_financial_transfer",
-                ],  # , "adapt_costs"],
-                timerange,
-                stackgroup={
-                    "rel_abatement_costs": "costs",
-                    "rel_mitigation_costs": "costs",
-                    "damage_costs": "costs",
-                    "rel_financial_transfer": "costs",
-                    # "adapt_costs": "costs",
-                },
-                yaxis_title="Costs (% GDP)",
-                tickformat="p",
-                height=height,
-            ),
-            style={"height": f"{height}px"},
+        html.Div(
+            [
+                html.Strong(short_name(filename) + ":"),
+                dcc.Graph(
+                    figure=plotutils.create_plot(
+                        {filename: single_df},
+                        [
+                            "rel_abatement_costs",
+                            "rel_mitigation_costs",
+                            "damage_costs",
+                            "rel_financial_transfer",
+                        ],  # , "adapt_costs"],
+                        timerange,
+                        stackgroup={
+                            "rel_abatement_costs": "costs",
+                            "rel_mitigation_costs": "costs",
+                            "damage_costs": "costs",
+                            "rel_financial_transfer": "costs",
+                            # "adapt_costs": "costs",
+                        },
+                        yaxis_title="Costs (% GDP)",
+                        tickformat="p",
+                        height=height,
+                    ),
+                    style={"height": f"{height}px"},
+                ),
+            ]
         )
         for filename, single_df in databases.items()
     ]

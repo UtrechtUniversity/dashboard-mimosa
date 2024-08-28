@@ -63,9 +63,9 @@ class DataStore:
             )
             if database is not None:
                 letter = chr(ord("A") + i)
-                name = f"{letter}: " + filename.rstrip(".csv").rstrip(".xls").rstrip(
-                    ".xlsx"
-                )
+                name = f"Scenario {letter}: " + filename.rstrip(".csv").rstrip(
+                    ".xls"
+                ).rstrip(".xlsx")
                 databases[name] = {
                     "data": database,
                     "meta": {"line_dash": line_dash},
