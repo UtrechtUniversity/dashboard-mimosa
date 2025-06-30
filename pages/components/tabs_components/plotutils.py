@@ -48,16 +48,16 @@ def create_plot(
         regions_to_axis = {region: f"x{i+1}" for i, region in enumerate(regions)}
 
         if percapita:
-            pop_selection = database[
-                (database["Variable"] == "population")
-                & (database["Region"].isin(regions))
-            ]
-            population_factor = pop_selection.drop(
-                columns=["Variable", "Unit"], errors="ignore"
-            ).set_index("Region")
-            per_cap_unit = f"/({pop_selection.iloc[0]['Unit']})"
+            regional_population_factor, per_cap_unit1 = _population_factor(
+                database, regions, False
+            )
+            global_population_factor, per_cap_unit2 = _population_factor(
+                database, regions, True
+            )
+            per_cap_unit = per_cap_unit1 or per_cap_unit2
         else:
-            population_factor = 1
+            regional_population_factor = 1
+            global_population_factor = 1
             per_cap_unit = ""
 
         units = (
@@ -66,8 +66,8 @@ def create_plot(
             .set_index("Variable")["Unit"]
             .replace(
                 {
-                    "usd*trillion/yr": "Trillion USD/yr",
-                    "fraction_of_GDP": "% GDP",
+                    "usd*trillion/yr": "trillion USD/yr",
+                    "fraction_of_GDP": "% of GDP",
                     "degC_above_PI": "°C above PI",
                 }
             )
@@ -88,18 +88,17 @@ def create_plot(
                 var_i if colors is None else colors[var_i]
             ]
 
-            subselection = (
-                subselection.drop(
-                    columns=["Variable", "Unit"], errors="ignore"
-                ).set_index("Region")
-                / population_factor
+            is_global = subselection.iloc[0]["Region"] == "Global"
+            subselection = subselection.drop(
+                columns=["Variable", "Unit"], errors="ignore"
+            ).set_index("Region") / (
+                global_population_factor if is_global else regional_population_factor
             )
 
-            unit_str = (
-                f" ({units[variable]}{per_cap_unit})"
-                if multiple_units and variable in units
-                else ""
-            )
+            unit_str = f"{units[variable]}{per_cap_unit}"
+            unit_str_hover = (
+                unit_str.replace("% ", "") if tickformat in ["p", "%"] else unit_str
+            ).replace("dimensionless", "")
 
             for region_i, (region, values) in enumerate(
                 subselection.loc[:, str(timerange[0]) : str(timerange[1])].iterrows()
@@ -113,10 +112,15 @@ def create_plot(
                         "yaxis": "y1",
                         "line": {"color": color, "dash": line_dash},
                         "mode": "lines",
-                        "name": variable + unit_str,
+                        "name": variable
+                        + (
+                            f" ({unit_str})"
+                            if multiple_units and variable in units
+                            else ""
+                        ),
                         "legendgroup": variable,
                         "showlegend": region_i == 0 and df_i == 0,
-                        "hovertemplate": f"{short_name}, {variable}: %{{y}}<extra></extra>",
+                        "hovertemplate": f"{short_name}, {variable}: %{{y}}{unit_str_hover}<extra></extra>",
                         "visible": (
                             "legendonly"
                             if hidden_variables is not None
@@ -191,3 +195,20 @@ def create_plot(
             fig["layout"][yaxis]["tickformat"] = tickformat
 
     return fig
+
+
+def _population_factor(database, regions, is_global):
+    pop_selection = database[
+        (database["Variable"] == ("global_population" if is_global else "population"))
+        & (database["Region"].isin(regions))
+    ]
+    population_factor = pop_selection.drop(
+        columns=["Variable", "Unit"], errors="ignore"
+    ).set_index("Region")
+
+    if pop_selection.empty:
+        per_cap_unit = None
+    else:
+        per_cap_unit = f"/({pop_selection.iloc[0]['Unit']})"
+
+    return population_factor, per_cap_unit

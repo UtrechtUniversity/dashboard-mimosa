@@ -1,6 +1,7 @@
 """
 Plot any available variable
 """
+
 import pandas as pd
 from common.dash import dcc, dbc, html, Input, Output, PreventUpdate
 from common import data, params
@@ -21,7 +22,7 @@ layout = html.Div(
         dbc.RadioItems(
             options=[
                 {"label": "Absolute", "value": False},
-                {"label": "Per capita (not for global variables)", "value": True},
+                {"label": "Per capita", "value": True},
             ],
             value=False,
             inline=True,
