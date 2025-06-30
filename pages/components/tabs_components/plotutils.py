@@ -41,6 +41,8 @@ def create_plot(
         short_name = name.split(":")[0] if ":" in name else name
 
         selection = database[database["Variable"].isin(variables)]
+        if selection.empty:
+            continue
         regions = list(selection["Region"].unique())
 
         regions_to_axis = {region: f"x{i+1}" for i, region in enumerate(regions)}
