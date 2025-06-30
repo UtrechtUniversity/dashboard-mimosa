@@ -63,7 +63,7 @@ def update_costs_plot(databases, timerange):
                             "rel_financial_transfer": "costs",
                             # "adapt_costs": "costs",
                         },
-                        yaxis_title="Costs (% GDP)",
+                        yaxis_title="Costs",
                         tickformat="p",
                         height=height,
                     ),
@@ -89,7 +89,7 @@ def update_carbonprices_plot(databases, timerange):
         databases,
         ["carbonprice"],
         timerange,
-        yaxis_title="TODO",
+        yaxis_title="",
         colors=[3],
         height=params.FIXED_PLOT_HEIGHT,
     )

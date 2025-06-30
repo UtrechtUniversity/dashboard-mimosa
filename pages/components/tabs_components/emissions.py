@@ -1,6 +1,7 @@
 """
 Plots for the emissions plot
 """
+
 from common.dash import dcc, dbc, html, Input, Output, PreventUpdate
 from common import data, params
 
@@ -58,7 +59,7 @@ def update_plot_regional_emissions(databases, timerange):
         databases,
         ["baseline", "regional_emissions"],
         timerange,
-        yaxis_title="Emissions (GtCO<sub>2</sub>/yr)",
+        yaxis_title="Emissions",
         height=params.FIXED_PLOT_HEIGHT,
     )
 
@@ -78,7 +79,7 @@ def update_plot_global_emissions(databases, timerange):
         databases,
         ["global_emissions", "cumulative_emissions"],
         timerange,
-        yaxis_title="Emissions (GtCO<sub>2</sub>/yr)",
+        yaxis_title="Emissions",
         hidden_variables=["cumulative_emissions"],
         colors=[2, 3],
         height=params.FIXED_PLOT_HEIGHT,
@@ -100,7 +101,7 @@ def update_plot_temperature(databases, timerange):
         databases,
         ["temperature"],
         timerange,
-        yaxis_title="GMST (above pre-industrial)",
+        yaxis_title="GMST",
         colors=[4],
         height=params.FIXED_PLOT_HEIGHT,
     )

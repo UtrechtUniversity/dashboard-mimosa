@@ -3,6 +3,7 @@ Tab for the GDP plots:
  - GDP, capital stock and consumption with absolute vs per capita switch
  - Utility
 """
+
 from common.dash import dcc, dbc, html, Input, Output, PreventUpdate
 from common import data
 
@@ -48,7 +49,7 @@ def update_gdp_plot(databases, timerange, percapita):
         databases,
         ["GDP_gross", "GDP_net", "capital_stock", "consumption"],
         timerange,
-        yaxis_title="trillion US$2005/yr",
+        yaxis_title="",
         percapita=percapita,
         hidden_variables=["capital_stock"],
     )

@@ -46,16 +46,35 @@ def create_plot(
         regions_to_axis = {region: f"x{i+1}" for i, region in enumerate(regions)}
 
         if percapita:
-            population_factor = (
-                database[
-                    (database["Variable"] == "population")
-                    & (database["Region"].isin(regions))
-                ]
-                .drop(columns=["Variable", "Unit"], errors="ignore")
-                .set_index("Region")
-            )
+            pop_selection = database[
+                (database["Variable"] == "population")
+                & (database["Region"].isin(regions))
+            ]
+            population_factor = pop_selection.drop(
+                columns=["Variable", "Unit"], errors="ignore"
+            ).set_index("Region")
+            per_cap_unit = f"/({pop_selection.iloc[0]['Unit']})"
         else:
             population_factor = 1
+            per_cap_unit = ""
+
+        units = (
+            selection[["Variable", "Unit"]]
+            .drop_duplicates()
+            .set_index("Variable")["Unit"]
+            .replace(
+                {
+                    "usd*trillion/yr": "Trillion USD/yr",
+                    "fraction_of_GDP": "% GDP",
+                    "degC_above_PI": "°C above PI",
+                }
+            )
+        )
+        multiple_units = False
+        if len(units.unique()) == 1:
+            yaxis_title += f" ({units.iloc[0]}{per_cap_unit})"
+        elif len(units) > 1:
+            multiple_units = True
 
         var_i = 0
         for var_i, (variable, subselection) in enumerate(selection.groupby("Variable")):
@@ -72,6 +91,12 @@ def create_plot(
                 / population_factor
             )
 
+            unit_str = (
+                f" ({units[variable]}{per_cap_unit})"
+                if multiple_units and variable in units
+                else ""
+            )
+
             for region_i, (region, values) in enumerate(
                 subselection.loc[:, str(timerange[0]) : str(timerange[1])].iterrows()
             ):
@@ -84,7 +109,7 @@ def create_plot(
                         "yaxis": "y1",
                         "line": {"color": color, "dash": line_dash},
                         "mode": "lines",
-                        "name": variable,
+                        "name": variable + unit_str,
                         "legendgroup": variable,
                         "showlegend": region_i == 0 and df_i == 0,
                         "hovertemplate": f"{short_name}, {variable}: %{{y}}<extra></extra>",
@@ -104,9 +129,7 @@ def create_plot(
 
     layout = {
         "grid": {"columns": len(regions), "rows": 1},
-        "yaxis1": {
-            "title": yaxis_title + (" (per capita) [UNIT?]" if percapita else "")
-        },
+        "yaxis1": {"title": yaxis_title},
         "margin": {"l": 50, "r": 20, "t": 30, "b": 30},
         "legend": {
             "orientation": "h",
