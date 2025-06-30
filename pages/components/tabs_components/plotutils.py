@@ -69,10 +69,12 @@ def create_plot(
                     "degC_above_PI": "°C above PI",
                 }
             )
+            .str.replace("CO2", "CO<sub>2</sub>", regex=False)
         )
         multiple_units = False
+        yaxis_title_with_unit = yaxis_title
         if len(units.unique()) == 1:
-            yaxis_title += f" ({units.iloc[0]}{per_cap_unit})"
+            yaxis_title_with_unit += f" ({units.iloc[0]}{per_cap_unit})"
         elif len(units) > 1:
             multiple_units = True
 
@@ -122,14 +124,13 @@ def create_plot(
                         "stackgroup": stackgroup.get(variable),
                     }
                 )
-                # TODO: handle units automatically if available
 
     minyear = float(timerange[0])
     maxyear = float(timerange[-1])
 
     layout = {
         "grid": {"columns": len(regions), "rows": 1},
-        "yaxis1": {"title": yaxis_title},
+        "yaxis1": {"title": yaxis_title_with_unit},
         "margin": {"l": 50, "r": 20, "t": 30, "b": 30},
         "legend": {
             "orientation": "h",
