@@ -77,6 +77,8 @@ def create_plot(
         yaxis_title_with_unit = yaxis_title
         if len(units.unique()) == 1:
             yaxis_title_with_unit += f" ({units.iloc[0]}{per_cap_unit})"
+            if "%" in str(units.iloc[0]) and per_cap_unit == "":
+                tickformat = "p"
         elif len(units) > 1:
             multiple_units = True
 
