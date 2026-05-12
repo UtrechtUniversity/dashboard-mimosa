@@ -57,7 +57,7 @@ def update_plot_regional_emissions(databases, timerange):
 
     fig = plotutils.create_plot(
         databases,
-        ["baseline", "regional_emissions"],
+        ["baseline", "baseline_emissions", "regional_emissions"],
         timerange,
         yaxis_title="Emissions",
         height=params.FIXED_PLOT_HEIGHT,

@@ -52,7 +52,6 @@ pio.templates["ipcc"] = go.layout.Template(
                 for color in IPCC_COLORS
             ],
             heatmap=[go.Heatmap(colorbar_outlinewidth=0)],
-            heatmapgl=[go.Heatmapgl(colorbar_outlinewidth=0)],
         ),
         "layout": dict(
             title={

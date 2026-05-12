@@ -25,7 +25,10 @@ layout_rangeslider = dcc.RangeSlider(
 layout = html.Div(
     [
         dbc.Row(
-            [dbc.Col([html.P("Experiment:")], md=1), dbc.Col([fileupload.layout]),]
+            [
+                dbc.Col([html.P("Experiment:")], md=1),
+                dbc.Col([fileupload.layout]),
+            ]
         ),
         dbc.Row(
             [
