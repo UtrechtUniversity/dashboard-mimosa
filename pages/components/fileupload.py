@@ -225,4 +225,8 @@ def parse_contents(content, filename: str, line_dash):
         return None, None  # TODO
         # return html.Div(["There was an error processing this file."])
 
+    # In old versions of MIMOSA, baseline_emissions was called "baseline", and "ssp_baseline_emissions" was called "baseline_emissions"
+    variables = df["Variable"].unique()
+    if "baseline" in variables:
+        df = df[df["Variable"] != "baseline_emissions"]
     return {"data": df.to_dict(), "meta": {"line_dash": line_dash}}, True
