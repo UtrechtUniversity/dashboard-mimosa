@@ -21,6 +21,7 @@ layout_rangeslider = dcc.RangeSlider(
     step=10,
     value=[2020, 2100],
     marks={int(x): str(int(x)) for x in np.arange(2020, 2200, 10)},
+    allow_direct_input=False,
 )
 layout = html.Div(
     [

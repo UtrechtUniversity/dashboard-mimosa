@@ -1,3 +1,8 @@
+:root {
+    --mimosa-green: #89a041;
+    --Dash-Fill-Interactive-Strong: #89a041;
+}
+
 body {
     overflow-y: scroll;
 }
@@ -38,24 +43,8 @@ hr.lessmargin {
     height: 250px;
 }
 
-.rc-slider-track {
-    background-color: #89a041;
-}
+.tab-parent .tab {
 
-.rc-slider-dot-active {
-    border-color: #89a041;
-    border: solid 2px #89a041;
-}
-
-.rc-slider-handle {
-    background-color: #89a041;
-    border-color: #89a041;
-}
-
-.rc-slider-handle:hover {
-    border-color: #89a041;
-}
-
-.rc-slider-handle-active:active {
-    border-color: #89a041;
+    --tabs-background: #f9f9f9;
+    --tabs-border: #d6d6d6;
 }
