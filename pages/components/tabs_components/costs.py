@@ -87,7 +87,7 @@ def update_carbonprices_plot(databases, timerange):
 
     fig = plotutils.create_plot(
         databases,
-        ["carbonprice"],
+        ["carbonprice", "carbon_price"],
         timerange,
         yaxis_title="",
         colors=[3],

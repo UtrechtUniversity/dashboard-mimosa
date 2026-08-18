@@ -56,6 +56,7 @@ def update_damages_plot(databases, timerange):
                             "damage_costs_non_slr",
                             "gross_damages",
                             "SLR_damages",
+                            "slr_damage_costs",
                         ],
                         timerange,
                         stackgroup={
