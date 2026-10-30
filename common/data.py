@@ -62,6 +62,25 @@ def scenario_shortnames(filenames):
     return [shortname or stem for shortname, stem in zip(shortnames, stems)]
 
 
+def label_scenarios(scenarios):
+    """Give a sequence of ``(filename, database)`` pairs consistent labels."""
+    filenames = [filename for filename, _ in scenarios]
+    shortnames = scenario_shortnames(filenames)
+    databases = {}
+
+    for i, (shortname, (filename, database)) in enumerate(
+        zip(shortnames, scenarios)
+    ):
+        letter = chr(ord("A") + i)
+        name = f"Scenario {letter} ({shortname}): {filename_stem(filename)}"
+        database.setdefault("meta", {})
+        database["meta"]["filename"] = filename
+        database["meta"]["line_dash"] = LINE_STYLES[i % len(LINE_STYLES)]
+        databases[name] = database
+
+    return databases or None
+
+
 def filename_to_path(filename):
     # Strip filename of slashes for security
     filename = filename.replace("/", "").replace("\\", "")
@@ -102,26 +121,15 @@ class DataStore:
             return None
         # For each filename in the list, get the corresponding database
         loaded = []
-        for filename, line_dash in zip(filenames, LINE_STYLES):
+        for filename in filenames:
             database = self.get_single_data(filename, as_dict)
             params = self.get_single_params(filename)
             if database is not None:
-                loaded.append((filename, line_dash, database, params))
+                loaded.append(
+                    (filename, {"data": database, "meta": {"params": params}})
+                )
 
-        databases = {}
-        shortnames = scenario_shortnames([filename for filename, *_ in loaded])
-        for i, (shortname, (filename, line_dash, database, params)) in enumerate(
-            zip(shortnames, loaded)
-        ):
-            letter = chr(ord("A") + i)
-            name = f"Scenario {letter} ({shortname}): {filename_stem(filename)}"
-            databases[name] = {
-                "data": database,
-                "meta": {"line_dash": line_dash, "params": params},
-            }
-        if len(databases) == 0:
-            return None
-        return databases
+        return label_scenarios(loaded)
 
     def get_single_data(self, filename, as_dict: bool):
         # 1. Check if file still needs to be read out

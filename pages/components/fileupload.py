@@ -13,7 +13,7 @@ import pandas as pd
 
 from app import app
 from common import data
-from common.dash import dbc, dcc, Input, Output, State, html, PreventUpdate
+from common.dash import dbc, dash, dcc, Input, Output, State, html, PreventUpdate
 
 
 def all_experiments_options():
@@ -26,13 +26,15 @@ def all_experiments_options():
 
 upload_style = {
     "width": "100%",
-    "height": "60px",
-    "lineHeight": "60px",
+    "height": "70px",
     "borderWidth": "1px",
     "borderStyle": "dashed",
     "borderRadius": "5px",
     "textAlign": "center",
-    "margin": "10px",
+    "display": "flex",
+    "alignItems": "center",
+    "justifyContent": "center",
+    "margin": "10px 0",
 }
 
 layout_upload = html.Div(
@@ -44,7 +46,9 @@ layout_upload = html.Div(
                         id="upload-data",
                         children=html.Div(
                             [
-                                "Drag and Drop or ",
+                                html.Strong("Replace scenarios"),
+                                html.Br(),
+                                "Drag and drop or ",
                                 html.A("Select Files", href="#"),
                             ]
                         ),
@@ -53,16 +57,21 @@ layout_upload = html.Div(
                         multiple=True,
                     )
                 ),
-                # dbc.Col(
-                #     dcc.Upload(
-                #         id="upload-data-add-extra",
-                #         children=html.Div("Add to current selection"),
-                #         style=upload_style,
-                #         # Allow multiple files to be uploaded
-                #         multiple=True,
-                #     ),
-                #     md=2,
-                # ),
+                dbc.Col(
+                    dcc.Upload(
+                        id="upload-data-add",
+                        children=html.Div(
+                            [
+                                html.Strong("Add scenarios"),
+                                html.Br(),
+                                "Drag and drop or ",
+                                html.A("Select Files", href="#"),
+                            ]
+                        ),
+                        style=upload_style,
+                        multiple=True,
+                    )
+                ),
             ]
         )
     ],
@@ -110,14 +119,12 @@ layout = html.Div(
 
 
 def handle_upload_update(list_of_content, list_of_names):
-    databases = {}
-    name_map = {}  # Contains the mapping from filename to display name
     params = {}
     parsed_data = []
     if list_of_content is not None:
         i = 0
         for content, filename in zip(list_of_content, list_of_names):
-            line_dash = (data.LINE_STYLES * 5)[i]
+            line_dash = data.LINE_STYLES[i % len(data.LINE_STYLES)]
             parsed_dict, is_data = parse_contents(content, filename, line_dash)
             if parsed_dict is not None:
                 if is_data:
@@ -126,23 +133,28 @@ def handle_upload_update(list_of_content, list_of_names):
                 else:
                     params[filename] = parsed_dict
 
-    shortnames = data.scenario_shortnames([filename for filename, _ in parsed_data])
-    for i, (shortname, (filename, parsed_dict)) in enumerate(
-        zip(shortnames, parsed_data)
-    ):
-        letter = chr(ord("A") + i)
-        name = f"Scenario {letter} ({shortname}): {data.filename_stem(filename)}"
-        name_map[filename] = name
-        databases[name] = parsed_dict
+    for filename, parsed_dict in parsed_data:
+        params_filename = f"{filename}.params.json"
+        if params_filename in params:
+            parsed_dict["meta"]["params"] = params[params_filename]
 
-    for name_raw, single_params in params.items():
-        data_filename = name_raw[: -len(".params.json")]
-        name = name_map[data_filename]
-        if name in databases:
-            databases[name]["meta"]["params"] = single_params
-    if len(databases) > 0:
-        return databases
-    return None
+    return data.label_scenarios(parsed_data)
+
+
+def add_databases(databases, additions):
+    """Add new scenarios and consistently relabel the combined collection."""
+    combined = {}
+    for name, database in (databases or {}).items():
+        filename = database.get("meta", {}).get("filename")
+        if filename is None:
+            filename = name.rsplit(": ", 1)[-1]
+        combined[filename] = database
+
+    for name, database in (additions or {}).items():
+        filename = database["meta"]["filename"]
+        combined[filename] = database
+
+    return data.label_scenarios(list(combined.items()))
 
 
 def handle_select_update(names):
@@ -159,14 +171,35 @@ def handle_select_update(names):
         Input("file-select-type", "active_tab"),
         Input("plot-fileselection-filename", "value"),
         Input("upload-data", "contents"),
+        Input("upload-data-add", "contents"),
         State("upload-data", "filename"),
+        State("upload-data-add", "filename"),
+        State("plot-data-store", "data"),
     ],
 )
-def update_data(active_tab, select_names, upload_contents, upload_names):
+def update_data(
+    active_tab,
+    select_names,
+    upload_contents,
+    add_contents,
+    upload_names,
+    add_names,
+    databases,
+):
     if active_tab == "files-select":
         return handle_select_update(select_names)
     if active_tab == "files-upload":
-        return handle_upload_update(upload_contents, upload_names)
+        if dash.ctx.triggered_id == "upload-data-add":
+            additions = handle_upload_update(add_contents, add_names)
+            if additions is None:
+                raise PreventUpdate
+            return add_databases(databases, additions)
+        if dash.ctx.triggered_id == "upload-data":
+            replacements = handle_upload_update(upload_contents, upload_names)
+            if replacements is None:
+                raise PreventUpdate
+            return replacements
+        return databases
     raise PreventUpdate
 
 
