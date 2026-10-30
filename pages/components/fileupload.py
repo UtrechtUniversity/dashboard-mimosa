@@ -55,7 +55,8 @@ layout_upload = html.Div(
                         style=upload_style,
                         # Allow multiple files to be uploaded
                         multiple=True,
-                    )
+                    ),
+                    id="upload-replace-column",
                 ),
                 dbc.Col(
                     dcc.Upload(
@@ -77,6 +78,14 @@ layout_upload = html.Div(
     ],
     style={"padding-top": "10px"},
 )
+
+
+@app.callback(
+    Output("upload-replace-column", "style"),
+    Input("plot-data-store", "data"),
+)
+def show_replace_upload(databases):
+    return {} if databases else {"display": "none"}
 
 
 layout_dropdown = dcc.Dropdown(
