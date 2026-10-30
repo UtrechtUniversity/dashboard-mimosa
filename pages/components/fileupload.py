@@ -19,7 +19,7 @@ from common.dash import dbc, dcc, Input, Output, State, html, PreventUpdate
 def all_experiments_options():
     options = []
     for filename in data.get_all_experiments():
-        name = filename.rstrip(".csv").rstrip(".xls").rstrip(".xlsx")
+        name = data.filename_stem(filename)
         options.append({"label": name, "value": filename})
     return options
 
@@ -111,8 +111,9 @@ layout = html.Div(
 
 def handle_upload_update(list_of_content, list_of_names):
     databases = {}
-    name_map = {}  # Contains the mapping from filename to display name (with letter)
+    name_map = {}  # Contains the mapping from filename to display name
     params = {}
+    parsed_data = []
     if list_of_content is not None:
         i = 0
         for content, filename in zip(list_of_content, list_of_names):
@@ -120,18 +121,23 @@ def handle_upload_update(list_of_content, list_of_names):
             parsed_dict, is_data = parse_contents(content, filename, line_dash)
             if parsed_dict is not None:
                 if is_data:
-                    letter = chr(ord("A") + i)
-                    name = f"Scenario {letter}: " + filename.rstrip(".csv").rstrip(
-                        ".xls"
-                    ).rstrip(".xlsx")
-                    name_map[filename] = name
-                    databases[name] = parsed_dict
+                    parsed_data.append((filename, parsed_dict))
                     i += 1
                 else:
                     params[filename] = parsed_dict
 
+    shortnames = data.scenario_shortnames([filename for filename, _ in parsed_data])
+    for i, (shortname, (filename, parsed_dict)) in enumerate(
+        zip(shortnames, parsed_data)
+    ):
+        letter = chr(ord("A") + i)
+        name = f"Scenario {letter} ({shortname}): {data.filename_stem(filename)}"
+        name_map[filename] = name
+        databases[name] = parsed_dict
+
     for name_raw, single_params in params.items():
-        name = name_map[name_raw.rstrip(".params.json")]
+        data_filename = name_raw[: -len(".params.json")]
+        name = name_map[data_filename]
         if name in databases:
             databases[name]["meta"]["params"] = single_params
     if len(databases) > 0:
