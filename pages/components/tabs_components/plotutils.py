@@ -133,6 +133,8 @@ def create_plot(
                     }
                 )
 
+    traces = [part for trace in traces for part in _split_stack(trace, tickformat)]
+
     minyear = float(timerange[0])
     maxyear = float(timerange[-1])
 
@@ -197,6 +199,53 @@ def create_plot(
             fig["layout"][yaxis]["tickformat"] = tickformat
 
     return fig
+
+
+def _split_stack(trace, tickformat=None):
+    """Stack each value above or below zero, including changes of sign."""
+    if not trace.get("stackgroup"):
+        return [trace]
+
+    x = np.asarray(trace["x"], dtype=float)
+    y = np.asarray(trace["y"], dtype=float)
+
+    # Insert the exact zero crossings so a change of sign meets at zero.
+    crossings = np.flatnonzero(y[:-1] * y[1:] < 0)
+    zero_x = x[crossings] - y[crossings] * (
+        x[crossings + 1] - x[crossings]
+    ) / (y[crossings + 1] - y[crossings])
+    x = np.insert(x, crossings + 1, zero_x)
+    original = np.insert(np.ones(len(y), dtype=bool), crossings + 1, False)
+    y = np.insert(y, crossings + 1, 0)
+
+    # Use hovertext so per-point hoverinfo can suppress the artificial zeros.
+    number_format = ".3%" if tickformat in ("p", "%") else ".6g"
+    hovertext = [
+        trace["hovertemplate"].replace("%{y}", format(value, number_format))
+        .replace("<extra></extra>", "")
+        for value in y
+    ]
+
+    return [
+        {
+            **trace,
+            "x": x.tolist(),
+            "y": clipped.tolist(),
+            "stackgroup": f"{trace['stackgroup']}-{sign}",
+            "stackgaps": "interpolate",
+            "showlegend": trace["showlegend"] and sign == "positive",
+            "hovertemplate": None,
+            "hovertext": hovertext,
+            "hoverinfo": [
+                "x+text" if keep else "none"
+                for keep in original & (y >= 0 if sign == "positive" else y < 0)
+            ],
+        }
+        for sign, clipped in (
+            ("positive", np.maximum(y, 0)),
+            ("negative", np.minimum(y, 0)),
+        )
+    ]
 
 
 def _population_factor(database, regions, is_global):
