@@ -39,11 +39,11 @@ layout = html.Div(
 ## List of variables
 @app.callback(
     Output("tabs-all-variables-dropdown1", "options"),
-    [Input("plot-data-store", "data")],
+    [Input("plot-selected-store", "data")],
 )
 def update_available_variables(databases):
     if databases is None or len(databases) == 0:
-        raise PreventUpdate
+        return []
 
     variables = set()
     for df_i, df_info in enumerate(databases.values()):
@@ -63,19 +63,16 @@ def update_available_variables(databases):
 @app.callback(
     Output("tabs-all-variables-plot1", "figure"),
     [
-        Input("plot-data-store", "data"),
+        Input("plot-selected-store", "data"),
         Input("plot-timerange", "value"),
         Input("tabs-all-variables-dropdown1", "value"),
         Input("tabs-all-variables-percapita1", "value"),
     ],
 )
 def update_plot1(databases, timerange, selected_variables, percapita):
-    if (
-        databases is None
-        or len(databases) == 0
-        or selected_variables is None
-        or len(selected_variables) == 0
-    ):
+    if databases is None or len(databases) == 0:
+        return {}
+    if selected_variables is None or len(selected_variables) == 0:
         raise PreventUpdate
 
     fig = plotutils.create_plot(

@@ -45,7 +45,7 @@ layout = html.Div(
 )
 
 
-@app.callback(Output("plot-timerange", "max"), [Input("plot-data-store", "data")])
+@app.callback(Output("plot-timerange", "max"), [Input("plot-selected-store", "data")])
 def update_range(databases):
     if databases is None or len(databases) == 0:
         raise PreventUpdate

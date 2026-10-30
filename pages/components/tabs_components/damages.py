@@ -35,11 +35,11 @@ layout = html.Div(
 ## Residual vs gross damage costs
 @app.callback(
     Output("tabs-damages-main-plots", "children"),
-    [Input("plot-data-store", "data"), Input("plot-timerange", "value")],
+    [Input("plot-selected-store", "data"), Input("plot-timerange", "value")],
 )
 def update_damages_plot(databases, timerange):
     if databases is None or len(databases) == 0:
-        raise PreventUpdate
+        return []
 
     height = max(250, params.DEFAULT_PLOT_HEIGHT / len(databases))
     figs = [
@@ -81,11 +81,11 @@ def update_damages_plot(databases, timerange):
 ## Adaptation level
 @app.callback(
     Output("tabs-damages-adaptlevel-plot", "figure"),
-    [Input("plot-data-store", "data"), Input("plot-timerange", "value")],
+    [Input("plot-selected-store", "data"), Input("plot-timerange", "value")],
 )
 def update_adaptlevel_plot(databases, timerange):
     if databases is None or len(databases) == 0:
-        raise PreventUpdate
+        return {}
 
     fig = plotutils.create_plot(
         databases,
@@ -122,11 +122,11 @@ def update_adaptlevel_plot(databases, timerange):
 ## Sea level rise
 @app.callback(
     Output("tabs-damages-SLR-plots", "children"),
-    [Input("plot-data-store", "data"), Input("plot-timerange", "value")],
+    [Input("plot-selected-store", "data"), Input("plot-timerange", "value")],
 )
 def update_slr_plot(databases, timerange):
     if databases is None or len(databases) == 0:
-        raise PreventUpdate
+        return []
 
     height = params.DEFAULT_PLOT_HEIGHT
     figs = dbc.Row(

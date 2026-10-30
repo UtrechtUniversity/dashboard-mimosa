@@ -4,7 +4,7 @@ Provides a table with the differences between the selected scenarios.
 
 import pandas as pd
 from app import app
-from common.dash import dbc, dcc, Input, Output, html
+from common.dash import ALL, dbc, dcc, Input, Output, State, html
 
 
 layout = dbc.Row(
@@ -30,10 +30,22 @@ def update_legend(databases):
 
     headers = [
         html.Th(
-            html.Div(
-                [create_empty_legend(name, databases[name]["meta"]["line_dash"]), name],
-                style={"display": "flex", "align-items": "center"},
-            )
+            [
+                html.Div(
+                    [
+                        create_empty_legend(
+                            name, databases[name]["meta"]["line_dash"]
+                        ),
+                        name,
+                    ],
+                    style={"display": "flex", "align-items": "center"},
+                ),
+                dbc.Switch(
+                    id={"type": "scenario-toggle", "index": name},
+                    label="Show",
+                    value=True,
+                ),
+            ]
         )
         for name in differences.columns
     ]
@@ -47,6 +59,28 @@ def update_legend(databases):
     table_body = [html.Tbody(rows)]
 
     return dbc.Table(table_header + table_body, size="sm", hover=True)
+
+
+@app.callback(
+    Output("plot-selected-store", "data"),
+    Input({"type": "scenario-toggle", "index": ALL}, "value"),
+    Input("plot-data-store", "data"),
+    State({"type": "scenario-toggle", "index": ALL}, "id"),
+)
+def update_selected_scenarios(toggle_values, databases, toggle_ids):
+    if not databases:
+        return {}
+    if not toggle_ids or {toggle_id["index"] for toggle_id in toggle_ids} != set(
+        databases
+    ):
+        return databases
+
+    selected = {
+        toggle_id["index"]
+        for toggle_id, enabled in zip(toggle_ids, toggle_values)
+        if enabled
+    }
+    return {name: database for name, database in databases.items() if name in selected}
 
 
 def create_empty_legend(name, dash):

@@ -35,11 +35,11 @@ layout = html.Div(
 ## Regional costs (adaptation+abatement+resid damages)
 @app.callback(
     Output("tabs-costs-plots", "children"),
-    [Input("plot-data-store", "data"), Input("plot-timerange", "value")],
+    [Input("plot-selected-store", "data"), Input("plot-timerange", "value")],
 )
 def update_costs_plot(databases, timerange):
     if databases is None or len(databases) == 0:
-        raise PreventUpdate
+        return []
 
     height = max(250, params.DEFAULT_PLOT_HEIGHT / len(databases))
     figs = [
@@ -79,11 +79,11 @@ def update_costs_plot(databases, timerange):
 ## Carbon prices
 @app.callback(
     Output("tabs-costs-carbonprices-plot", "figure"),
-    [Input("plot-data-store", "data"), Input("plot-timerange", "value")],
+    [Input("plot-selected-store", "data"), Input("plot-timerange", "value")],
 )
 def update_carbonprices_plot(databases, timerange):
     if databases is None or len(databases) == 0:
-        raise PreventUpdate
+        return {}
 
     fig = plotutils.create_plot(
         databases,
@@ -99,11 +99,11 @@ def update_carbonprices_plot(databases, timerange):
 ## Learning factors
 @app.callback(
     Output("tabs-costs-learning-plot", "figure"),
-    [Input("plot-data-store", "data"), Input("plot-timerange", "value")],
+    [Input("plot-selected-store", "data"), Input("plot-timerange", "value")],
 )
 def update_learning_plot(databases, timerange):
     if databases is None or len(databases) == 0:
-        raise PreventUpdate
+        return {}
 
     fig = plotutils.create_plot(
         databases,

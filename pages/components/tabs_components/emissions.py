@@ -49,11 +49,11 @@ layout = html.Div(
 ## Regional emissions
 @app.callback(
     Output("tabs-regional-emissions-plot", "figure"),
-    [Input("plot-data-store", "data"), Input("plot-timerange", "value")],
+    [Input("plot-selected-store", "data"), Input("plot-timerange", "value")],
 )
 def update_plot_regional_emissions(databases, timerange):
     if databases is None or len(databases) == 0:
-        raise PreventUpdate
+        return {}
 
     fig = plotutils.create_plot(
         databases,
@@ -69,11 +69,11 @@ def update_plot_regional_emissions(databases, timerange):
 ## Global emissions and cumulative emissions
 @app.callback(
     Output("tabs-global-emissions-plot", "figure"),
-    [Input("plot-data-store", "data"), Input("plot-timerange", "value")],
+    [Input("plot-selected-store", "data"), Input("plot-timerange", "value")],
 )
 def update_plot_global_emissions(databases, timerange):
     if databases is None or len(databases) == 0:
-        raise PreventUpdate
+        return {}
 
     fig = plotutils.create_plot(
         databases,
@@ -91,11 +91,11 @@ def update_plot_global_emissions(databases, timerange):
 ## Temperature
 @app.callback(
     Output("tabs-global-temperature-plot", "figure"),
-    [Input("plot-data-store", "data"), Input("plot-timerange", "value")],
+    [Input("plot-selected-store", "data"), Input("plot-timerange", "value")],
 )
 def update_plot_temperature(databases, timerange):
     if databases is None or len(databases) == 0:
-        raise PreventUpdate
+        return {}
 
     fig = plotutils.create_plot(
         databases,

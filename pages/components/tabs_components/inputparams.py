@@ -17,11 +17,11 @@ layout = html.Div(
 
 
 @app.callback(
-    Output("tabs-inputparams-pre", "children"), [Input("plot-data-store", "data")]
+    Output("tabs-inputparams-pre", "children"), [Input("plot-selected-store", "data")]
 )
 def update_params(databases):
-    if databases is None:
-        raise PreventUpdate
+    if not databases:
+        return []
     html_elements = []
     for filename, database in databases.items():
         if "params" in database["meta"]:
