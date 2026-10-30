@@ -29,8 +29,10 @@ def create_plot(
         stackgroup = {}
 
     traces = []
+    legend_variables = set()
+    variable_indices = {}
 
-    for df_i, (name, df_info) in enumerate(df_dict.items()):
+    for name, df_info in df_dict.items():
         database = df_info["data"]
         if isinstance(database, dict):
             # t0 = time.time()
@@ -82,8 +84,8 @@ def create_plot(
         elif len(units) > 1:
             multiple_units = True
 
-        var_i = 0
-        for var_i, (variable, subselection) in enumerate(selection.groupby("Variable")):
+        for variable, subselection in selection.groupby("Variable"):
+            var_i = variable_indices.setdefault(variable, len(variable_indices))
             # Color list * 3 to get the same colours repeated three times,
             # such that it never runs out of range
             color = (plotly_theme.IPCC_COLORS * 3)[
@@ -102,9 +104,9 @@ def create_plot(
                 unit_str.replace("% ", "") if tickformat in ["p", "%"] else unit_str
             ).replace("dimensionless", "")
 
-            for region_i, (region, values) in enumerate(
-                subselection.loc[:, str(timerange[0]) : str(timerange[1])].iterrows()
-            ):
+            for region, values in subselection.loc[
+                :, str(timerange[0]) : str(timerange[1])
+            ].iterrows():
                 traces.append(
                     {
                         "type": "scatter",
@@ -121,7 +123,7 @@ def create_plot(
                             else ""
                         ),
                         "legendgroup": variable,
-                        "showlegend": region_i == 0 and df_i == 0,
+                        "showlegend": variable not in legend_variables,
                         "hovertemplate": f"{short_name}, {variable}: %{{y}}{unit_str_hover}<extra></extra>",
                         "visible": (
                             "legendonly"
@@ -132,6 +134,7 @@ def create_plot(
                         "stackgroup": stackgroup.get(variable),
                     }
                 )
+                legend_variables.add(variable)
 
     traces = [part for trace in traces for part in _split_stack(trace, tickformat)]
 
@@ -148,7 +151,7 @@ def create_plot(
             "xanchor": "center",
             "y": 0.0,
             "yref": "container",
-            "title": {"text": f"Variable{'s' if var_i > 0 else ''}:"},
+            "title": {"text": f"Variable{'s' if len(legend_variables) > 1 else ''}:"},
         },
         "hovermode": "x",
         "height": height,

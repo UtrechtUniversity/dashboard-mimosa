@@ -16,18 +16,12 @@ from app import app
 layout = html.Div(
     [
         html.Br(),
-        html.H4("Residual vs gross damage costs, with adaptation costs"),
+        html.H4("Residual vs gross damage costs, by impact sector"),
         dcc.Loading(html.Div(id="tabs-damages-main-plots")),
+        html.H4("Adaptation level, by impact sector"),
         dcc.Loading(
             dcc.Graph(id="tabs-damages-adaptlevel-plot", className="fixed_height_plot")
         ),
-        # html.H4("Adaptation level (top) and stock vs flow (bottom):"),
-        # dcc.Loading(
-        #     dcc.Graph(id="tabs-damages-adaptlevel-plot", className="fixed_height_plot")
-        # ),
-        # dcc.Loading(
-        #     dcc.Graph(id="tabs-damages-adaptcosts-plot", className="fixed_height_plot")
-        # ),
         html.H4("Sea level rise:"),
         dcc.Loading(html.Div(id="tabs-damages-SLR-plots")),
     ],
