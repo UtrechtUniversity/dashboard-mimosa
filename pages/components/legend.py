@@ -4,8 +4,17 @@ Provides a table with the differences between the selected scenarios.
 
 import pandas as pd
 from app import app
-from common.dash import ALL, dbc, dcc, Input, Output, State, html
-
+from common.dash import (
+    ALL,
+    Input,
+    Output,
+    PreventUpdate,
+    State,
+    dash,
+    dbc,
+    dcc,
+    html,
+)
 
 layout = dbc.Row(
     [
@@ -33,26 +42,57 @@ def update_legend(databases):
             [
                 html.Div(
                     [
-                        create_empty_legend(
-                            name, databases[name]["meta"]["line_dash"]
-                        ),
+                        create_empty_legend(name, databases[name]["meta"]["line_dash"]),
                         name,
                     ],
                     style={"display": "flex", "align-items": "center"},
                 ),
-                dbc.Switch(
-                    id={"type": "scenario-toggle", "index": name},
-                    label="Show",
-                    value=True,
+                html.Div(
+                    [
+                        dbc.Switch(
+                            id={"type": "scenario-toggle", "index": name},
+                            label="Show",
+                            value=True,
+                            persistence=True,
+                            persistence_type="memory",
+                            style={"marginBottom": 0, "fontWeight": "normal"},
+                        ),
+                        html.Button(
+                            id={"type": "scenario-delete", "index": name},
+                            n_clicks=0,
+                            className="btn-close",
+                            title="Delete scenario",
+                            style={
+                                "fontSize": "0.7rem",
+                                "padding": "0.25rem",
+                            },
+                            **{"aria-label": "Delete scenario"},
+                        ),
+                    ],
+                    style={
+                        "display": "flex",
+                        "alignItems": "center",
+                        "justifyContent": "space-between",
+                        "height": "1.5rem",
+                        "marginTop": "10px",
+                        "width": "100%",
+                    },
                 ),
-            ]
+            ],
+            style={"borderLeft": "1px solid #dee2e6"},
         )
         for name in differences.columns
     ]
     table_header = [html.Thead(html.Tr([html.Td()] + headers))]
 
     rows = [
-        html.Tr([html.Th(param)] + [html.Td(str(value)) for value in row])
+        html.Tr(
+            [html.Th(param)]
+            + [
+                html.Td(str(value), style={"borderLeft": "1px solid #dee2e6"})
+                for value in row
+            ]
+        )
         for param, row in differences.iterrows()
     ]
 
@@ -81,6 +121,20 @@ def update_selected_scenarios(toggle_values, databases, toggle_ids):
         if enabled
     }
     return {name: database for name, database in databases.items() if name in selected}
+
+
+@app.callback(
+    Output("plot-data-store", "data", allow_duplicate=True),
+    Input({"type": "scenario-delete", "index": ALL}, "n_clicks"),
+    State("plot-data-store", "data"),
+    prevent_initial_call=True,
+)
+def delete_scenario(n_clicks, databases):
+    if not n_clicks or not any(n_clicks) or not databases:
+        raise PreventUpdate
+
+    scenario = dash.ctx.triggered_id["index"]
+    return {name: database for name, database in databases.items() if name != scenario}
 
 
 def create_empty_legend(name, dash):
