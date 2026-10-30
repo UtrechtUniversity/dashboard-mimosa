@@ -211,9 +211,9 @@ def _split_stack(trace, tickformat=None):
 
     # Insert the exact zero crossings so a change of sign meets at zero.
     crossings = np.flatnonzero(y[:-1] * y[1:] < 0)
-    zero_x = x[crossings] - y[crossings] * (
-        x[crossings + 1] - x[crossings]
-    ) / (y[crossings + 1] - y[crossings])
+    zero_x = x[crossings] - y[crossings] * (x[crossings + 1] - x[crossings]) / (
+        y[crossings + 1] - y[crossings]
+    )
     x = np.insert(x, crossings + 1, zero_x)
     original = np.insert(np.ones(len(y), dtype=bool), crossings + 1, False)
     y = np.insert(y, crossings + 1, 0)
@@ -221,7 +221,8 @@ def _split_stack(trace, tickformat=None):
     # Use hovertext so per-point hoverinfo can suppress the artificial zeros.
     number_format = ".3%" if tickformat in ("p", "%") else ".6g"
     hovertext = [
-        trace["hovertemplate"].replace("%{y}", format(value, number_format))
+        trace["hovertemplate"]
+        .replace("%{y}", format(value, number_format))
         .replace("<extra></extra>", "")
         for value in y
     ]

@@ -18,6 +18,9 @@ layout = html.Div(
         html.Br(),
         html.H4("Residual vs gross damage costs, with adaptation costs"),
         dcc.Loading(html.Div(id="tabs-damages-main-plots")),
+        dcc.Loading(
+            dcc.Graph(id="tabs-damages-adaptlevel-plot", className="fixed_height_plot")
+        ),
         # html.H4("Adaptation level (top) and stock vs flow (bottom):"),
         # dcc.Loading(
         #     dcc.Graph(id="tabs-damages-adaptlevel-plot", className="fixed_height_plot")
@@ -50,24 +53,31 @@ def update_damages_plot(databases, timerange):
                     figure=plotutils.create_plot(
                         {filename: single_df},
                         [
-                            "adapt_costs",
-                            "resid_damages",
-                            "damage_costs_slr",
-                            "damage_costs_non_slr",
-                            "gross_damages",
-                            "SLR_damages",
+                            "non_slr_damage_costs",
                             "slr_damage_costs",
+                            "slr_damage_costs_gross",
+                            "labourprod_damage_costs",
+                            "labourprod_damage_costs_net",
+                            "labourprod_damage_costs_gross",
+                            "riverine_damage_costs",
+                            "riverine_damage_costs_gross",
                         ],
                         timerange,
                         stackgroup={
-                            "adapt_costs": "costs",
-                            "resid_damages": "costs",
-                            "damage_costs_slr": "costs",
-                            "damage_costs_non_slr": "costs",
+                            "non_slr_damage_costs": "costs",
+                            "slr_damage_costs": "costs",
+                            "riverine_damage_costs": "costs",
+                            "labourprod_damage_costs_net": "costs",
                         },
                         yaxis_title="Costs",
                         tickformat="p",
                         height=height,
+                        hidden_variables=[
+                            "slr_damage_costs_gross",
+                            "labourprod_damage_costs",
+                            "labourprod_damage_costs_gross",
+                            "riverine_damage_costs_gross",
+                        ],
                     ),
                     style={"height": f"{height}px"},
                 ),
@@ -89,34 +99,16 @@ def update_adaptlevel_plot(databases, timerange):
 
     fig = plotutils.create_plot(
         databases,
-        ["adapt_level", "SLR_adapt_level"],
+        [
+            "labourprod_adaptation_level",
+            "riverine_adaptation_level",
+            "slr_adaptation_level",
+        ],
         timerange,
-        colors=[4, 5],
+        colors=[4, 5, 6],
         height=params.FIXED_PLOT_HEIGHT,
     )
     return fig
-
-
-## Adaptation costs disaggregation
-# @app.callback(
-#     Output("tabs-damages-adaptcosts-plot", "figure"),
-#     [Input("plot-data-store", "data"), Input("plot-timerange", "value")],
-# )
-# def update_adaptcosts_plot(databases, timerange):
-#     if databases is None or len(databases) == 0:
-#         raise PreventUpdate
-
-#     fig = plotutils.create_plot(
-#         databases,
-#         ["adapt_FAD", "adapt_IAD", "adapt_SAD"],
-#         timerange,
-#         hidden_variables=["adapt_SAD"],
-#         height=params.FIXED_PLOT_HEIGHT,
-#         yaxis_title="Costs (% GDP)",
-#         tickformat="p",
-#         colors=[5, 6, 7],
-#     )
-#     return fig
 
 
 ## Sea level rise
@@ -139,25 +131,23 @@ def update_slr_plot(databases, timerange):
                             figure=plotutils.create_plot(
                                 {filename: single_df},
                                 [
-                                    "SLR",  # Old names
-                                    "CUMGSIC",
-                                    "CUMGIS",
                                     "slr_thermal",  # New names
                                     "slr_cumgsic",
                                     "slr_cumgis",
+                                    "slr_cumais",
+                                    "slr_cumlws",
                                     "total_SLR",
                                 ],
                                 timerange,
                                 stackgroup={
-                                    "SLR": "SLR",
-                                    "CUMGSIC": "SLR",
-                                    "CUMGIS": "SLR",
                                     "slr_thermal": "SLR",
                                     "slr_cumgsic": "SLR",
                                     "slr_cumgis": "SLR",
+                                    "slr_cumais": "SLR",
+                                    "slr_cumlws": "SLR",
                                 },
                                 yaxis_title="SLR",
-                                colors=[8, 9, 10, 11],
+                                colors=[8, 9, 10, 4, 11, 6],
                                 height=height,
                             ),
                             style={"height": f"{height}px"},
