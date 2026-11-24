@@ -31,6 +31,8 @@ def create_plot(
     traces = []
     legend_variables = set()
     variable_indices = {}
+    regions = []
+    yaxis_title_with_unit = yaxis_title
 
     for name, df_info in df_dict.items():
         database = df_info["data"]
@@ -142,7 +144,7 @@ def create_plot(
     maxyear = float(timerange[-1])
 
     layout = {
-        "grid": {"columns": len(regions), "rows": 1},
+        "grid": {"columns": max(len(regions), 1), "rows": 1},
         "yaxis1": {"title": yaxis_title_with_unit},
         "margin": {"l": 50, "r": 20, "t": 30, "b": 30},
         "legend": {
