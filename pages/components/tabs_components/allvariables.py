@@ -44,14 +44,10 @@ def create_panel(index):
                 options=[],
                 multi=True,
             ),
-            dbc.RadioItems(
-                options=[
-                    {"label": "Absolute", "value": False},
-                    {"label": "Per capita", "value": True},
-                ],
-                value=False,
-                inline=True,
+            dbc.Switch(
                 id={"type": "tabs-all-variables-percapita", "index": index},
+                label="Divide by population",
+                value=False,
             ),
             dcc.Loading(
                 dcc.Graph(
